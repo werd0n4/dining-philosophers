@@ -1,17 +1,20 @@
 #include <iostream>
+#include <vector>
 #include <ncurses.h>
 #include <thread>
 #include <condition_variable>
 
 #include "Philosopher.cpp"
-#include "Fork.cpp"
+// #include "Fork.cpp"
 
-bool running;
+bool running, isStarted;
+int x_max_size=0;
 
 WINDOW** init_screen()
 {
     initscr();   
-    int y_max_size, x_max_size;
+    curs_set(0);
+    int y_max_size;
     getmaxyx(stdscr, y_max_size, x_max_size);
     WINDOW* inputWin = newwin(3, x_max_size/2, 0, 0);
     WINDOW* exitWin = newwin(3, x_max_size/2, 0, x_max_size/2);
@@ -33,12 +36,18 @@ WINDOW** init_screen()
     return windows;
 }
 
-void refresh_screen(WINDOW** windows)
+void refresh_screen(std::vector<Philosopher>& phils, std::vector<Fork>& forks)
 {
     while(running){
-        // refresh();
-        // wrefresh(windows[1]);
-        // wrefresh(windows[0]);
+        refresh();
+        for(auto it = phils.begin(); it != phils.end(); ++it){
+            wrefresh((*it).forksWin);
+            wrefresh((*it).statusWin);
+            wrefresh((*it).progresWin);
+        }
+        for(auto it = forks.begin(); it != forks.end(); ++it){
+            wrefresh((*it).window);
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -46,7 +55,6 @@ void refresh_screen(WINDOW** windows)
 
 void user_input(WINDOW** windows, int& philsNmb)
 {
-    bool isStarted = false;
     char* input;
     while(running){
         if(!isStarted){
@@ -70,14 +78,44 @@ void end_screen()
 
 int main()
 {
-    int philsNmb;
+    int philsNmb = 5;
+    std::vector<Fork> forks;
+    std::vector<Philosopher> philosophers;
+    std::vector<std::thread> philsThreads;
 
     running = true;
+    isStarted = false;
     WINDOW** windows = init_screen();
     
-    std::thread screenRefresh([&windows]{refresh_screen(windows);});
     std::thread userInput([&windows, &philsNmb]{user_input(windows, philsNmb);});
 
+    while(true){
+        if(isStarted){
+            forks = std::vector<Fork>(philsNmb);
+            for(int i = 0; i < philsNmb; ++i){
+                //forks init
+                forks[i].window = newwin(3, x_max_size/4, 3*(i + 1), 3./4*x_max_size);
+                box(forks[i].window, 0, 0);
+
+
+                //phils
+                philosophers.push_back(Philosopher(forks, i, x_max_size));
+            }            
+
+            break;
+        }
+    }
+    std::thread screenRefresh([&philosophers, &forks]{refresh_screen(philosophers, forks);});
+
+
+    // for(auto it = philosophers.begin(); it != philosophers.end(); ++it)
+    // {
+    //     philsThreads.push_back(std::thread([it]{it->feast();}));
+    // }
+    // for(auto it = philsThreads.begin(); it != philsThreads.end(); ++it)
+    // {
+    //     (*it).join();
+    // }
     screenRefresh.join();
     userInput.join();
 
