@@ -17,12 +17,25 @@ WINDOW** init_screen()
 {
     initscr();   
     curs_set(0);
+    //colors
+    start_color();
+    init_color(COLOR_YELLOW, 800, 800, 0);
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);//thinking
+    init_pair(2, COLOR_RED, COLOR_BLACK);//eating
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);//waiting
+    init_pair(4, COLOR_CYAN, COLOR_BLACK);//main frames
+    init_pair(5, COLOR_WHITE, COLOR_BLACK);//
+
     int y_max_size;
     getmaxyx(stdscr, y_max_size, x_max_size);
     WINDOW* inputWin = newwin(3, x_max_size/2, 0, 0);
     WINDOW* exitWin = newwin(3, x_max_size/2, 0, x_max_size/2);
+    wattron(inputWin, COLOR_PAIR(4));
     box(inputWin, 0, 0);
+    wattroff(inputWin, COLOR_PAIR(4));
+    wattron(exitWin, COLOR_PAIR(4));
     box(exitWin, 0, 0);
+    wattroff(exitWin, COLOR_PAIR(4));
     wmove(inputWin, 1, 1);
     wprintw(inputWin, "How many philosophers will be eating(should be >= 5): ");
     wmove(exitWin, 1, 1);
