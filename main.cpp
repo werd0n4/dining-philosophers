@@ -11,6 +11,7 @@
 
 bool running, isStarted;
 int x_max_size=0;
+std::mutex refresh_mtx;
 
 WINDOW** init_screen()
 {
@@ -119,8 +120,6 @@ int main()
     {
         (*it).join();
     }
-    std::thread screenRefresh([&philosophers, &forks]{refresh_screen(philosophers, forks);});
-    screenRefresh.join();
     userInput.join();
 
 
