@@ -90,10 +90,10 @@ class Philosopher
         bool temp;
         //first get fork with lower id 
         if(chairId < (chairId+1)%philsNmb){
-            //left fork
+            //right fork
             forks[chairId].cv.wait(ul, [&temp = forks[chairId].free]{return temp;});
             forks[chairId].free = false;
-            leftFork = std::to_string(chairId) + " ";
+            rightFork = std::to_string(chairId) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
                 werase(forksWin);
@@ -104,10 +104,10 @@ class Philosopher
                 wprintw(forksWin, rightFork.c_str());
                 wrefresh(forksWin);
             }
-            //right fork
-            forks[chairId+1].cv.wait(ul, [&temp = forks[chairId+1].free]{return temp;});
-            forks[chairId+1].free = false;
-            rightFork = std::to_string(chairId+1) + " ";
+            //left fork
+            forks[(chairId+1)%philsNmb].cv.wait(ul, [&temp = forks[(chairId+1)%philsNmb].free]{return temp;});
+            forks[(chairId+1)%philsNmb].free = false;
+            leftFork = std::to_string((chairId+1)%philsNmb) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
                 werase(forksWin);
@@ -120,10 +120,10 @@ class Philosopher
             }
         }
         else{
-            //right fork
-            forks[chairId+1].cv.wait(ul, [&temp = forks[chairId+1].free]{return temp;});
-            forks[chairId+1].free = false;
-            rightFork = std::to_string(chairId+1) + " ";
+            //left fork
+            forks[(chairId+1)%philsNmb].cv.wait(ul, [&temp = forks[(chairId+1)%philsNmb].free]{return temp;});
+            forks[(chairId+1)%philsNmb].free = false;
+            leftFork = std::to_string((chairId+1)%philsNmb) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
                 werase(forksWin);
@@ -134,10 +134,10 @@ class Philosopher
                 wprintw(forksWin, rightFork.c_str());
                 wrefresh(forksWin);
             }
-            //left fork
+            //right fork
             forks[chairId].cv.wait(ul, [&temp = forks[chairId].free]{return temp;});
             forks[chairId].free = false;
-            leftFork = std::to_string(chairId) + " ";
+            rightFork = std::to_string(chairId) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
                 werase(forksWin);
@@ -186,7 +186,7 @@ class Philosopher
         std::unique_lock<std::mutex> ul(forks[chairId].mtx);
         leftFork = "None ";
         rightFork = "None";
-        forks[chairId+1].free = true;
+        forks[(chairId+1)%philsNmb].free = true;
         forks[chairId].free = true;
         werase(forksWin);
         box(forksWin, 0, 0);
@@ -195,7 +195,7 @@ class Philosopher
         wprintw(forksWin, leftFork.c_str());
         wprintw(forksWin, rightFork.c_str());
         wrefresh(forksWin);
-        forks[chairId+1].cv.notify_one();
+        forks[(chairId+1)%philsNmb].cv.notify_one();
         forks[chairId].cv.notify_one();
     }
 
