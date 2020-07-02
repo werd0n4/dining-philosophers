@@ -101,7 +101,7 @@ int main()
                 //forks init
                 forks[i].window = newwin(3, x_max_size/4, 3*(i + 1), 3./4*x_max_size);
                 box(forks[i].window, 0, 0);
-                forks[i].in_use = false;
+                forks[i].free = true;
 
 
                 //phils
