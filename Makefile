@@ -1,9 +1,10 @@
 standard = 17
 libraries = -pthread -lncurses
-target = dinning-phils
+target = dinning-phils.o
 flags = -g -std=c++$(standard)
+files = main.cpp Fork.cpp Philosopher.cpp
 
-$(target): main.cpp 
+$(target): $(files) 
 	g++ main.cpp -o $(target) $(libraries) $(flags) 
 
 all: $(target)

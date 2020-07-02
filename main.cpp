@@ -3,6 +3,8 @@
 #include <ncurses.h>
 #include <thread>
 #include <condition_variable>
+#include <ctime>
+#include <cstdlib>
 
 #include "Philosopher.cpp"
 // #include "Fork.cpp"
@@ -60,7 +62,7 @@ void user_input(WINDOW** windows, int& philsNmb)
         if(!isStarted){
             mvwscanw(windows[0], 1, 44,"%d", &philsNmb);
             isStarted = true;
-            wmove(windows[1], 1, 65);
+            // wmove(windows[1], 1, 65);
         }
         else{
             char input = wgetch(windows[1]);
@@ -78,7 +80,8 @@ void end_screen()
 
 int main()
 {
-    int philsNmb = 5;
+    srand(time(NULL));
+    int philsNmb;
     std::vector<Fork> forks;
     std::vector<Philosopher> philosophers;
     std::vector<std::thread> philsThreads;
@@ -88,6 +91,7 @@ int main()
     WINDOW** windows = init_screen();
     
     std::thread userInput([&windows, &philsNmb]{user_input(windows, philsNmb);});
+
 
     while(true){
         if(isStarted){
@@ -105,17 +109,17 @@ int main()
             break;
         }
     }
+
+
+    for(auto it = philosophers.begin(); it != philosophers.end(); ++it)
+    {
+        philsThreads.push_back(std::thread([it]{it->feast();}));
+    }
+    for(auto it = philsThreads.begin(); it != philsThreads.end(); ++it)
+    {
+        (*it).join();
+    }
     std::thread screenRefresh([&philosophers, &forks]{refresh_screen(philosophers, forks);});
-
-
-    // for(auto it = philosophers.begin(); it != philosophers.end(); ++it)
-    // {
-    //     philsThreads.push_back(std::thread([it]{it->feast();}));
-    // }
-    // for(auto it = philsThreads.begin(); it != philsThreads.end(); ++it)
-    // {
-    //     (*it).join();
-    // }
     screenRefresh.join();
     userInput.join();
 

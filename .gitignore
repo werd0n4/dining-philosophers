@@ -1,1 +1,2 @@
-dinning-phils
+*.o
+.vscode/
