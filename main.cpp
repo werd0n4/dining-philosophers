@@ -32,28 +32,10 @@ WINDOW** init_screen()
     windows[0] = inputWin;
     windows[1] = exitWin;
 
-    refresh();
-    wrefresh(windows[0]);
-    wrefresh(windows[1]);
+    wrefresh(inputWin);
+    wrefresh(exitWin);
 
     return windows;
-}
-
-void refresh_screen(std::vector<Philosopher>& phils, std::vector<Fork>& forks)
-{
-    while(running){
-        refresh();
-        for(auto it = phils.begin(); it != phils.end(); ++it){
-            wrefresh((*it).forksWin);
-            wrefresh((*it).statusWin);
-            wrefresh((*it).progresWin);
-        }
-        // for(auto it = forks.begin(); it != forks.end(); ++it){
-        //     wrefresh((*it).window);
-        // }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
 }
 
 void user_input(WINDOW** windows, int& philsNmb)
@@ -63,7 +45,6 @@ void user_input(WINDOW** windows, int& philsNmb)
         if(!isStarted){
             mvwscanw(windows[0], 1, 55,"%d", &philsNmb);
             isStarted = true;
-            // wmove(windows[1], 1, 65);
         }
         else{
             char input = wgetch(windows[1]);
@@ -72,11 +53,6 @@ void user_input(WINDOW** windows, int& philsNmb)
             }
         }
     }
-}
-
-void end_screen()
-{
-    endwin();
 }
 
 int main()
@@ -93,24 +69,19 @@ int main()
     
     std::thread userInput([&windows, &philsNmb]{user_input(windows, philsNmb);});
 
-
     while(true){
         if(isStarted){
             forks = std::vector<Fork>(philsNmb);
             for(int i = 0; i < philsNmb; ++i){
                 //forks init
-                // forks[i].window = newwin(3, x_max_size/4, 3*(i + 1), 3./4*x_max_size);
-                // box(forks[i].window, 0, 0);
                 forks[i].free = true;
 
                 //phils
                 philosophers.push_back(Philosopher(forks, i, x_max_size, philsNmb));
             }            
-
             break;
         }
     }
-
 
     for(auto it = philosophers.begin(); it != philosophers.end(); ++it)
     {
@@ -122,8 +93,7 @@ int main()
     }
     userInput.join();
 
-
-    end_screen();
+    endwin();
 
     return 0;
 }

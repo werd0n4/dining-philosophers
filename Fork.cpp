@@ -6,5 +6,4 @@ class Fork
     std::mutex mtx;
     std::condition_variable cv;
     bool free;
-    // WINDOW* window;
 };
