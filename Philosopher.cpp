@@ -8,11 +8,6 @@ class Philosopher
     public:
     int chairId, window_width, cell_width, currentTime, baseTime = 4000, philsNmb;//time in miliseconds
     float percent;
-    std::chrono::high_resolution_clock::time_point start;
-    std::chrono::high_resolution_clock::time_point now;
-    std::chrono::duration<double> diff;
-    // enum State{ think, hungry, eat};
-    // State state;
     std::string state, leftFork, rightFork;
     std::vector<Fork>& forks;
     WINDOW* statusWin;    
@@ -42,17 +37,9 @@ class Philosopher
         {
             std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
             //statusWin
-            werase(statusWin);
-            box(statusWin, 0, 0);
-            wmove(statusWin, 1, 1);
-            wprintw(statusWin, "Philosopher nr %d ", chairId);
-            wprintw(statusWin, "THINKING");
-            wrefresh(statusWin);
+            clear_statusWin();
             //progresWin
-            werase(progresWin);
-            box(progresWin, 0, 0);
-            wmove(progresWin, 1, 1);
-            wrefresh(progresWin);
+            clear_progresWin();
             //forksWin
             refresh_forksWin();
         }
@@ -69,12 +56,7 @@ class Philosopher
 
         {
             std::lock_guard<std::mutex>refresh_guard(refresh_mtx);
-            werase(statusWin);
-            box(statusWin, 0, 0);
-            wmove(statusWin, 1, 1);
-            wprintw(statusWin, "Philosopher nr %d ", chairId);
-            wprintw(statusWin, "WAITING");
-            wrefresh(statusWin);
+            clear_statusWin();
         }
     }
 
@@ -124,17 +106,9 @@ class Philosopher
         {
             std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
             //statusWin
-            werase(statusWin);
-            box(statusWin, 0, 0);
-            wmove(statusWin, 1, 1);
-            wprintw(statusWin, "Philosopher nr %d ", chairId);
-            wprintw(statusWin, "EATING");
-            wrefresh(statusWin);
+            clear_statusWin();
             //progresWin
-            werase(progresWin);
-            box(progresWin, 0, 0);
-            wmove(progresWin, 1, 1);
-            wrefresh(progresWin);
+            clear_progresWin();
         }
         currentTime = baseTime + rand()%1001;
         currentTime = currentTime / (cell_width-2);
@@ -177,5 +151,21 @@ class Philosopher
         wprintw(forksWin, leftFork.c_str());
         wprintw(forksWin, rightFork.c_str());
         wrefresh(forksWin);
+    }
+
+    void clear_progresWin(){
+        werase(progresWin);
+        box(progresWin, 0, 0);
+        wmove(progresWin, 1, 1);
+        wrefresh(progresWin);
+    }
+
+    void clear_statusWin(){
+        werase(statusWin);
+        box(statusWin, 0, 0);
+        wmove(statusWin, 1, 1);
+        wprintw(statusWin, "Philosopher nr %d ", chairId);
+        wprintw(statusWin, "EATING");
+        wrefresh(statusWin);
     }
 };

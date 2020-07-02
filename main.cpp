@@ -48,9 +48,9 @@ void refresh_screen(std::vector<Philosopher>& phils, std::vector<Fork>& forks)
             wrefresh((*it).statusWin);
             wrefresh((*it).progresWin);
         }
-        for(auto it = forks.begin(); it != forks.end(); ++it){
-            wrefresh((*it).window);
-        }
+        // for(auto it = forks.begin(); it != forks.end(); ++it){
+        //     wrefresh((*it).window);
+        // }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -99,10 +99,9 @@ int main()
             forks = std::vector<Fork>(philsNmb);
             for(int i = 0; i < philsNmb; ++i){
                 //forks init
-                forks[i].window = newwin(3, x_max_size/4, 3*(i + 1), 3./4*x_max_size);
-                box(forks[i].window, 0, 0);
+                // forks[i].window = newwin(3, x_max_size/4, 3*(i + 1), 3./4*x_max_size);
+                // box(forks[i].window, 0, 0);
                 forks[i].free = true;
-
 
                 //phils
                 philosophers.push_back(Philosopher(forks, i, x_max_size, philsNmb));
