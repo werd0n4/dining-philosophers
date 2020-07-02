@@ -54,13 +54,7 @@ class Philosopher
             wmove(progresWin, 1, 1);
             wrefresh(progresWin);
             //forksWin
-            werase(forksWin);
-            box(forksWin, 0, 0);
-            wmove(forksWin, 1, 1);
-            wprintw(forksWin, "Used forks: ");
-            wprintw(forksWin, leftFork.c_str());
-            wprintw(forksWin, rightFork.c_str());
-            wrefresh(forksWin);
+            refresh_forksWin();
         }
         currentTime = baseTime + rand()%1001;
         currentTime = currentTime / (cell_width-2);
@@ -71,7 +65,6 @@ class Philosopher
                 mvwprintw(progresWin, 1, i, "=");
                 wrefresh(progresWin);
             }
-
         }
 
         {
@@ -96,13 +89,7 @@ class Philosopher
             rightFork = std::to_string(chairId) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
-                werase(forksWin);
-                box(forksWin, 0, 0);
-                wmove(forksWin, 1, 1);
-                wprintw(forksWin, "Used forks: ");
-                wprintw(forksWin, leftFork.c_str());
-                wprintw(forksWin, rightFork.c_str());
-                wrefresh(forksWin);
+                refresh_forksWin();
             }
             //left fork
             forks[(chairId+1)%philsNmb].cv.wait(ul, [&temp = forks[(chairId+1)%philsNmb].free]{return temp;});
@@ -110,13 +97,7 @@ class Philosopher
             leftFork = std::to_string((chairId+1)%philsNmb) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
-                werase(forksWin);
-                box(forksWin, 0, 0);
-                wmove(forksWin, 1, 1);
-                wprintw(forksWin, "Used forks: ");
-                wprintw(forksWin, leftFork.c_str());
-                wprintw(forksWin, rightFork.c_str());
-                wrefresh(forksWin);
+                refresh_forksWin();
             }
         }
         else{
@@ -126,13 +107,7 @@ class Philosopher
             leftFork = std::to_string((chairId+1)%philsNmb) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
-                werase(forksWin);
-                box(forksWin, 0, 0);
-                wmove(forksWin, 1, 1);
-                wprintw(forksWin, "Used forks: ");
-                wprintw(forksWin, leftFork.c_str());
-                wprintw(forksWin, rightFork.c_str());
-                wrefresh(forksWin);
+                refresh_forksWin();
             }
             //right fork
             forks[chairId].cv.wait(ul, [&temp = forks[chairId].free]{return temp;});
@@ -140,13 +115,7 @@ class Philosopher
             rightFork = std::to_string(chairId) + " ";
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
-                werase(forksWin);
-                box(forksWin, 0, 0);
-                wmove(forksWin, 1, 1);
-                wprintw(forksWin, "Used forks: ");
-                wprintw(forksWin, leftFork.c_str());
-                wprintw(forksWin, rightFork.c_str());
-                wrefresh(forksWin);
+                refresh_forksWin();
             }
         }
     }
@@ -178,8 +147,6 @@ class Philosopher
             }
 
         }
-
-
     }
 
     void put_forks(){
@@ -188,13 +155,7 @@ class Philosopher
         rightFork = "None";
         forks[(chairId+1)%philsNmb].free = true;
         forks[chairId].free = true;
-        werase(forksWin);
-        box(forksWin, 0, 0);
-        wmove(forksWin, 1, 1);
-        wprintw(forksWin, "Used forks: ");
-        wprintw(forksWin, leftFork.c_str());
-        wprintw(forksWin, rightFork.c_str());
-        wrefresh(forksWin);
+        refresh_forksWin();
         forks[(chairId+1)%philsNmb].cv.notify_one();
         forks[chairId].cv.notify_one();
     }
@@ -208,4 +169,13 @@ class Philosopher
         }
     }
 
+    void refresh_forksWin(){
+        werase(forksWin);
+        box(forksWin, 0, 0);
+        wmove(forksWin, 1, 1);
+        wprintw(forksWin, "Used forks: ");
+        wprintw(forksWin, leftFork.c_str());
+        wprintw(forksWin, rightFork.c_str());
+        wrefresh(forksWin);
+    }
 };
