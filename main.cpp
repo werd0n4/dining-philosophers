@@ -22,7 +22,7 @@ WINDOW** init_screen()
     init_pair(1, COLOR_GREEN, COLOR_BLACK);//thinking
     init_pair(2, COLOR_RED, COLOR_BLACK);//eating
     init_pair(3, COLOR_YELLOW, COLOR_BLACK);//waiting
-    init_pair(4, COLOR_CYAN, COLOR_BLACK);//main frames
+    init_pair(4, COLOR_CYAN, COLOR_BLACK);//input frames
     init_pair(5, COLOR_WHITE, COLOR_BLACK);//
 
     int y_max_size, x_max_size;
@@ -90,7 +90,7 @@ int main()
                 //forks init
                 forks[i].free = true;
 
-                //phils
+                //phils init
                 philosophers.push_back(Philosopher(forks, i, philsNmb));
             }            
             break;
