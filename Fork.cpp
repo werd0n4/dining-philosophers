@@ -1,9 +1,7 @@
-#include<atomic>
 
-class Fork
+struct Fork
 {
-    public:
     std::mutex mtx;
     std::condition_variable cv;
-    bool free;
+    std::atomic_bool free;
 };

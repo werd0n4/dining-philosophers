@@ -5,12 +5,11 @@
 #include <condition_variable>
 #include <ctime>
 #include <cstdlib>
+#include<atomic>
 
 #include "Philosopher.cpp"
-// #include "Fork.cpp"
 
 bool running, isStarted;
-int x_max_size=0;
 std::mutex refresh_mtx;
 
 WINDOW** init_screen()
@@ -26,18 +25,20 @@ WINDOW** init_screen()
     init_pair(4, COLOR_CYAN, COLOR_BLACK);//main frames
     init_pair(5, COLOR_WHITE, COLOR_BLACK);//
 
-    int y_max_size;
+    int y_max_size, x_max_size;
     getmaxyx(stdscr, y_max_size, x_max_size);
+    
     WINDOW* inputWin = newwin(3, x_max_size/2, 0, 0);
-    WINDOW* exitWin = newwin(3, x_max_size/2, 0, x_max_size/2);
     wattron(inputWin, COLOR_PAIR(4));
     box(inputWin, 0, 0);
     wattroff(inputWin, COLOR_PAIR(4));
+    wmove(inputWin, 1, 1);
+    wprintw(inputWin, "How many philosophers will be eating(should be >= 5): ");
+
+    WINDOW* exitWin = newwin(3, x_max_size/2, 0, x_max_size/2);
     wattron(exitWin, COLOR_PAIR(4));
     box(exitWin, 0, 0);
     wattroff(exitWin, COLOR_PAIR(4));
-    wmove(inputWin, 1, 1);
-    wprintw(inputWin, "How many philosophers will be eating(should be >= 5): ");
     wmove(exitWin, 1, 1);
     wprintw(exitWin, "To exit press q. (Program will stop all running threads first): ");
 
@@ -90,19 +91,19 @@ int main()
                 forks[i].free = true;
 
                 //phils
-                philosophers.push_back(Philosopher(forks, i, x_max_size, philsNmb));
+                philosophers.push_back(Philosopher(forks, i, philsNmb));
             }            
             break;
         }
     }
 
-    for(auto it = philosophers.begin(); it != philosophers.end(); ++it)
+    for(auto& phil : philosophers )
     {
-        philsThreads.push_back(std::thread([it]{it->feast();}));
+        philsThreads.push_back(std::thread([&phil]{phil.feast();}));
     }
-    for(auto it = philsThreads.begin(); it != philsThreads.end(); ++it)
+    for(auto& thread : philsThreads)
     {
-        (*it).join();
+        thread.join();
     }
     userInput.join();
 

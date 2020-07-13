@@ -1,9 +1,7 @@
 #include "Fork.cpp"
- 
+
 extern std::mutex refresh_mtx;
 extern bool running;
-
-enum Colors{think, eat, wait, frame};
 
 class Philosopher
 {
@@ -18,8 +16,7 @@ class Philosopher
     WINDOW* forksWin;    
 
     public:
-    Philosopher(std::vector<Fork>& _forks, int _chairId, int _window_width, int _philsNmb) : forks(_forks), chairId(_chairId), 
-                                                                                            window_width(_window_width), philsNmb(_philsNmb)
+    Philosopher(std::vector<Fork>& _forks, int _chairId, int _philsNmb) : forks(_forks), chairId(_chairId), philsNmb(_philsNmb)
     {
         //all philosophers except the last one, first take fork from right side
         //the last one takes first fork from left side
@@ -30,6 +27,7 @@ class Philosopher
             firstFork = chairId;
             secondFork = chairId + 1;
         }
+        getmaxyx(stdscr, std::ignore, window_width);
         leftFork = "None";
         rightFork = "None";
         cell_width = window_width/3;
@@ -52,7 +50,6 @@ class Philosopher
             clear_progresWin();
             update_fork('L', -1);
             update_fork('R', -1);
-            // refresh_forksWin();
         }
         currentTime = baseTime + rand()%1001;
         currentTime = currentTime / (cell_width-2);
@@ -78,15 +75,15 @@ class Philosopher
         bool temp;
 
         //first fork
-        forks[firstFork].cv.wait(ul, [&temp = forks[firstFork].free]{return temp;});
-        forks[firstFork].free = false;
+        forks[firstFork].cv.wait(ul, [this]{return forks[firstFork].free.load();});
+        forks[firstFork].free.store(false);
         {
             std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
             update_fork('R', firstFork);
         }
         //second fork
-        forks[secondFork].cv.wait(ul, [&temp = forks[secondFork].free]{return temp;});
-        forks[secondFork].free = false;
+        forks[secondFork].cv.wait(ul, [this]{return forks[secondFork].free.load();});
+        forks[secondFork].free.store(false);
         {
             std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
             update_fork('L', secondFork);
@@ -118,9 +115,8 @@ class Philosopher
             std::unique_lock<std::mutex> ul(forks[firstFork].mtx);
             leftFork = "None";
             rightFork = "None";
-            forks[secondFork].free = true;
-            forks[firstFork].free = true;
-            // refresh_forksWin();
+            forks[secondFork].free.store(true);
+            forks[firstFork].free.store(true);
             {
                 std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
                 update_fork('L',-1);
