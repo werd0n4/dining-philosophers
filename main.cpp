@@ -1,11 +1,10 @@
-#include <iostream>
 #include <vector>
 #include <ncurses.h>
 #include <thread>
 #include <condition_variable>
 #include <ctime>
 #include <cstdlib>
-#include<atomic>
+#include <atomic>
 
 #include "Philosopher.cpp"
 
@@ -19,26 +18,26 @@ WINDOW** init_screen()
     //colors
     start_color();
     init_color(COLOR_YELLOW, 800, 800, 0);
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);//thinking
-    init_pair(2, COLOR_RED, COLOR_BLACK);//eating
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK);//waiting
-    init_pair(4, COLOR_CYAN, COLOR_BLACK);//input frames
-    init_pair(5, COLOR_WHITE, COLOR_BLACK);//
+    init_pair(Colors::green, COLOR_GREEN, COLOR_BLACK);//thinking
+    init_pair(Colors::red, COLOR_RED, COLOR_BLACK);//eating
+    init_pair(Colors::yellow, COLOR_YELLOW, COLOR_BLACK);//waiting
+    init_pair(Colors::cyan, COLOR_CYAN, COLOR_BLACK);//input frames
+    init_pair(Colors::white, COLOR_WHITE, COLOR_BLACK);//
 
-    int y_max_size, x_max_size;
-    getmaxyx(stdscr, y_max_size, x_max_size);
+    const int y_max_size = getmaxy(stdscr);
+    const int x_max_size = getmaxx(stdscr);
     
     WINDOW* inputWin = newwin(3, x_max_size/2, 0, 0);
-    wattron(inputWin, COLOR_PAIR(4));
+    wattron(inputWin, COLOR_PAIR(Colors::cyan));
     box(inputWin, 0, 0);
-    wattroff(inputWin, COLOR_PAIR(4));
+    wattroff(inputWin, COLOR_PAIR(Colors::cyan));
     wmove(inputWin, 1, 1);
     wprintw(inputWin, "How many philosophers will be eating(should be >= 5): ");
 
     WINDOW* exitWin = newwin(3, x_max_size/2, 0, x_max_size/2);
-    wattron(exitWin, COLOR_PAIR(4));
+    wattron(exitWin, COLOR_PAIR(Colors::cyan));
     box(exitWin, 0, 0);
-    wattroff(exitWin, COLOR_PAIR(4));
+    wattroff(exitWin, COLOR_PAIR(Colors::cyan));
     wmove(exitWin, 1, 1);
     wprintw(exitWin, "To exit press q. (Program will stop all running threads first): ");
 

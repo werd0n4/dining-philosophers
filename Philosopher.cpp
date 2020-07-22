@@ -3,10 +3,13 @@
 extern std::mutex refresh_mtx;
 extern bool running;
 
+enum Colors{ green = 1, red, yellow, cyan, white };
+
 class Philosopher
 {
     public:
-    int chairId, window_width, cell_width, currentTime, baseTime = 4000, philsNmb;//time in miliseconds
+    int chairId, window_width, cell_width, currentTime, philsNmb;
+    const int baseTime = 4000;//time in miliseconds
     int firstFork, secondFork;
     std::string state, leftFork, rightFork;
     std::vector<Fork>& forks;
@@ -25,7 +28,8 @@ class Philosopher
             secondFork = chairId + 1;
         }
         
-        getmaxyx(stdscr, std::ignore, window_width);
+        // getmaxyx(stdscr, std::ignore, window_width);
+        window_width = getmaxx(stdscr);
         leftFork = "None";
         rightFork = "None";
         cell_width = window_width/3;
@@ -37,7 +41,7 @@ class Philosopher
         box(progresWin, 0, 0);
         box(forksWin, 0, 0);
 
-        std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
+        const std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
         wrefresh(statusWin);
         wrefresh(progresWin);
         wrefresh(forksWin);
@@ -53,7 +57,7 @@ class Philosopher
         currentTime = currentTime / (cell_width-2);
         for(int i = 1; i <= cell_width-2; ++i){
             std::this_thread::sleep_for(std::chrono::milliseconds(currentTime));
-            refresh_progress_bar(i, 1, "=");
+            refresh_progress_bar(i, Colors::green, "=");
         }
 
         refresh_statusWin("WAITING");
@@ -82,7 +86,7 @@ class Philosopher
 
         for(int i = 1; i <= cell_width-2; ++i){
             std::this_thread::sleep_for(std::chrono::milliseconds(currentTime));
-            refresh_progress_bar(i, 2, "#");
+            refresh_progress_bar(i, Colors::red, "#");
         }
     }
 
@@ -108,9 +112,9 @@ class Philosopher
     }
 
     void refresh_forksWin(){
-        int color = 5;
+        Colors color = white;
         if(leftFork !="None" && rightFork !="None"){
-            color = 2;
+            color = red;
         }
         
         werase(forksWin);
@@ -122,7 +126,7 @@ class Philosopher
         wprintw(forksWin, (leftFork+" ").c_str());
         wprintw(forksWin, rightFork.c_str());
 
-        std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
+        const std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
         wrefresh(forksWin);
     }
 
@@ -131,11 +135,11 @@ class Philosopher
         box(progresWin, 0, 0);
         wmove(progresWin, 1, 1);
 
-        std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
+        const std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
         wrefresh(progresWin);
     }
 
-    void update_fork(char side, int forkId){//forkId == -1 if philosopher puts fork down
+    void update_fork(const char& side, const int& forkId){//forkId == -1 if philosopher puts fork down
         if(side == 'L'){
             if(forkId == -1){
                 leftFork = "None";
@@ -153,15 +157,8 @@ class Philosopher
         refresh_forksWin();
     }
 
-    void refresh_statusWin(std::string state){
-        int color;
-        if(state == "THINKING"){
-            color = 1;
-        } else if(state == "EATING"){
-            color = 2;
-        } else{//WAITING
-            color = 3;
-        }
+    void refresh_statusWin(const std::string& state){
+        const Colors color = state == "THINKING" ? green : (state == "EATING" ? red : yellow );
 
         werase(statusWin);
         wattron(statusWin, COLOR_PAIR(color));
@@ -171,16 +168,16 @@ class Philosopher
         wprintw(statusWin, "Philosopher nr %d ", chairId);
         wprintw(statusWin, state.c_str());
 
-        std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
+        const std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
         wrefresh(statusWin);
     }
 
-    void refresh_progress_bar(int i, int color, std::string symbol){
+    void refresh_progress_bar(const int& i, const Colors& color, const std::string& symbol){
         wattron(progresWin, COLOR_PAIR(color));
         mvwprintw(progresWin, 1, i, symbol.c_str());
         wattroff(progresWin, COLOR_PAIR(color));
 
-        std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
+        const std::lock_guard<std::mutex> refresh_guard(refresh_mtx);
         wrefresh(progresWin);
     }
 };
