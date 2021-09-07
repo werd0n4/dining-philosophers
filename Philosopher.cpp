@@ -1,4 +1,7 @@
+
 #include "Fork.cpp"
+#include <ncurses.h>
+#include <vector>
 
 extern std::mutex refresh_mtx;
 extern bool running;
